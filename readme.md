@@ -15,6 +15,21 @@
 * Linux
 * C++14
 * MySql
+sudo apt install mysqlclient-dev
+sudo apt install mysql-server
+1、sudo mysql -uroot    回车直接登录
+2、修改密码：alter user 'root'@'localhost' identified with mysql_native_password by '这里是密码';
+3、执行：flush privileges；使密码生效，然后使用root用户登录。
+4、创建自己的用户：
+        create user '用户名'@'%' identified with mysql_native_password by '密码';
+5、授权用户远程登录：
+        grant all privileges on *.* to '用户'@'%' with grant option;
+6、刷新策略：flush privileges;
+
+如果远程登录不上错误10038需要修改一个文件，
+修改一个配置文件：sudo vim /etc/mysql/mysql.conf.d/mysqld.cnf
+注释掉：#bind-address    = 127.0.0.1
+然后重启mysql服务，即可远程登录了
 
 ## 目录树
 ```

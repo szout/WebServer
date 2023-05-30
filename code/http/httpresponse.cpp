@@ -118,6 +118,9 @@ void HttpResponse::AddHeader_(Buffer& buff) {
         buff.Append("close\r\n");
     }
     buff.Append("Content-type: " + GetFileType_() + "\r\n");
+    // * 表示允许任何域名跨域访问
+    buff.Append("Access-Control-Allow-Origin: *\r\n");
+
 }
 
 void HttpResponse::AddContent_(Buffer& buff) {

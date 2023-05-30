@@ -7,11 +7,11 @@
 using namespace std;
 
 const unordered_set<string> HttpRequest::DEFAULT_HTML{
-            "/index", "/register", "/login",
+            "/index", "/register", "/login", "/upload",
              "/welcome", "/video", "/picture", };
 
 const unordered_map<string, int> HttpRequest::DEFAULT_HTML_TAG {
-            {"/register.html", 0}, {"/login.html", 1},  };
+            {"/register.html", 0}, {"/login.html", 1}, {"/upload.html", 2}, };
 
 void HttpRequest::Init() {
     method_ = path_ = version_ = body_ = "";
@@ -77,6 +77,7 @@ void HttpRequest::ParsePath_() {
 }
 
 bool HttpRequest::ParseRequestLine_(const string& line) {
+    
     regex patten("^([^ ]*) ([^ ]*) HTTP/([^ ]*)$");
     smatch subMatch;
     if(regex_match(line, subMatch, patten)) {   
@@ -84,6 +85,10 @@ bool HttpRequest::ParseRequestLine_(const string& line) {
         path_ = subMatch[2];
         version_ = subMatch[3];
         state_ = HEADERS;
+         
+         //printf("method = %s\n",method_.c_str());
+         //printf("path_ = %s\n",path_.c_str());
+
         return true;
     }
     LOG_ERROR("RequestLine Error");
@@ -102,6 +107,9 @@ void HttpRequest::ParseHeader_(const string& line) {
 }
 
 void HttpRequest::ParseBody_(const string& line) {
+    //printf("line = %s\n",line.c_str());
+    //printf("body = %ld %s",body_.size(), body_.c_str());
+
     body_ = line;
     ParsePost_();
     state_ = FINISH;
@@ -115,17 +123,24 @@ int HttpRequest::ConverHex(char ch) {
 }
 
 void HttpRequest::ParsePost_() {
+        //std::string method_, path_, version_, body_;
+        printf("body = %s\n",body_.c_str());
+
     if(method_ == "POST" && header_["Content-Type"] == "application/x-www-form-urlencoded") {
         ParseFromUrlencoded_();
+
+
         if(DEFAULT_HTML_TAG.count(path_)) {
             int tag = DEFAULT_HTML_TAG.find(path_)->second;
             LOG_DEBUG("Tag:%d", tag);
-            if(tag == 0 || tag == 1) {
+            if(tag >= 0 && tag <= 2) {
                 bool isLogin = (tag == 1);
-                if(UserVerify(post_["username"], post_["password"], isLogin)) {
+                if(UserVerify(post_["username"], post_["password"], isLogin)) 
+                {
                     path_ = "/welcome.html";
                 } 
-                else {
+                else 
+                {
                     path_ = "/error.html";
                 }
             }
@@ -135,6 +150,7 @@ void HttpRequest::ParsePost_() {
 
 void HttpRequest::ParseFromUrlencoded_() {
     if(body_.size() == 0) { return; }
+
 
     string key, value;
     int num = 0;
@@ -182,9 +198,8 @@ bool HttpRequest::UserVerify(const string &name, const string &pwd, bool isLogin
     assert(sql);
     
     bool flag = false;
-    unsigned int j = 0;
     char order[256] = { 0 };
-    MYSQL_FIELD *fields = nullptr;
+    //MYSQL_FIELD *fields = nullptr;
     MYSQL_RES *res = nullptr;
     
     if(!isLogin) { flag = true; }
@@ -197,8 +212,9 @@ bool HttpRequest::UserVerify(const string &name, const string &pwd, bool isLogin
         return false; 
     }
     res = mysql_store_result(sql);
-    j = mysql_num_fields(res);
-    fields = mysql_fetch_fields(res);
+    mysql_num_fields(res);
+    //fields = mysql_fetch_fields(res);
+    mysql_fetch_fields(res);
 
     while(MYSQL_ROW row = mysql_fetch_row(res)) {
         LOG_DEBUG("MYSQL ROW: %s %s", row[0], row[1]);
