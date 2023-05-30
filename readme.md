@@ -15,6 +15,7 @@
 * Linux
 * C++14
 * MySql
+```
 sudo apt install mysqlclient-dev
 sudo apt install mysql-server
 1、sudo mysql -uroot    回车直接登录
@@ -30,6 +31,7 @@ sudo apt install mysql-server
 修改一个配置文件：sudo vim /etc/mysql/mysql.conf.d/mysqld.cnf
 注释掉：#bind-address    = 127.0.0.1
 然后重启mysql服务，即可远程登录了
+```
 
 ## 目录树
 ```
